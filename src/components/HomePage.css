@@ -1,0 +1,29 @@
+.container {
+  background-color: rgb(8, 82, 192);
+  height: 100vh;
+  padding: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.input-group {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.input-group label {
+  margin-right: 10px;
+}
+
+.descricao-label {
+  width: 100%;
+}
+
+.descricao-textarea {
+  width: 100%;
+  min-height: 100px;
+}
