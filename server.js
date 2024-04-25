@@ -15,7 +15,7 @@ const db = mysql.createConnection({
   host: '127.0.0.1',
   user: 'root',
   port: 3306,
-  password: 'root',
+  password: '@102030Irigotayndu',
   database: 'fcalista'
 });
 
@@ -79,6 +79,25 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+// Rota para buscar todos os cards
+app.get('/cards', verifyToken, (req, res) => {
+  const userId = req.userId; // ID do usuário extraído do token JWT
+
+  // Consulta SQL para selecionar todos os cards do usuário
+  const sql = 'SELECT * FROM cards WHERE user_id = ?';
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('Erro ao buscar os cards:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+    console.log('Cards encontrados:', result);
+    res.status(200).json(result); // Retorna os cards encontrados
+  });
+});
+
+
+
 
 
 // Rota para receber e armazenar o username e gerar token JWT
@@ -136,6 +155,129 @@ app.post('/adicionarCard', verifyToken, (req, res) => {
       res.status(200).json({ message: 'Novo card adicionado com sucesso' });
   });
 });
+
+// Rota para atualizar um card existente
+app.put('/editarCard/:cardId', verifyToken, (req, res) => {
+  const cardId = req.params.cardId;
+  const { titulo, empresa, contato1, contato2, descricao } = req.body;
+  const userId = req.userId; // ID do usuário extraído do token JWT
+
+  // Verificar se o card pertence ao usuário
+  db.query('SELECT * FROM cards WHERE id = ? AND user_id = ?', [cardId, userId], (err, result) => {
+    if (err) {
+      console.error('Erro ao verificar o card:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+    // Se o card não for encontrado ou não pertencer ao usuário, retornar um erro
+    if (result.length === 0) {
+      res.status(404).json({ error: 'Card não encontrado ou não autorizado' });
+      return;
+    }
+
+    // Atualizar os dados do card
+    const sql = 'UPDATE cards SET titulo = ?, empresa = ?, contato1 = ?, contato2 = ?, descricao = ? WHERE id = ?';
+    db.query(sql, [titulo, empresa, contato1, contato2, descricao, cardId], (err, result) => {
+      if (err) {
+        console.error('Erro ao atualizar o card:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
+      }
+      console.log('Card atualizado com sucesso');
+      res.status(200).json({ message: 'Card atualizado com sucesso' });
+    });
+  });
+});
+
+// Rota para excluir um card específico
+app.delete('/excluirCard/:cardId', verifyToken, (req, res) => {
+  const cardId = req.params.cardId;
+  const userId = req.userId; // ID do usuário extraído do token JWT
+
+  // Verificar se o card pertence ao usuário
+  db.query('SELECT * FROM cards WHERE id = ? AND user_id = ?', [cardId, userId], (err, result) => {
+      if (err) {
+          console.error('Erro ao verificar o card:', err);
+          res.status(500).json({ error: 'Erro interno do servidor' });
+          return;
+      }
+      // Se o card não for encontrado ou não pertencer ao usuário, retornar um erro
+      if (result.length === 0) {
+          res.status(404).json({ error: 'Card não encontrado ou não autorizado' });
+          return;
+      }
+
+      // Excluir o card do banco de dados
+      db.query('DELETE FROM cards WHERE id = ?', [cardId], (err, result) => {
+          if (err) {
+              console.error('Erro ao excluir o card:', err);
+              res.status(500).json({ error: 'Erro interno do servidor' });
+              return;
+          }
+          console.log('Card excluído com sucesso');
+          res.status(200).json({ message: 'Card excluído com sucesso' });
+      });
+  });
+});
+
+// Rota para buscar todos os usuários
+app.get('/users', (req, res) => {
+  // Consulta SQL para selecionar todos os usuários
+  const sql = 'SELECT * FROM users';
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Erro ao buscar os usuários:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+    console.log('Usuários encontrados:', result);
+    res.status(200).json(result); // Retorna os usuários encontrados
+  });
+});
+
+// Rota para atualizar o cargo do usuário
+app.put('/updateUserRole/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const { cargo } = req.body;
+
+  // Atualizar o campo 'cargo' na tabela de usuários
+  const sql = 'UPDATE users SET cargo = ? WHERE id = ?';
+  db.query(sql, [cargo, userId], (err, result) => {
+    if (err) {
+      console.error('Erro ao atualizar o cargo do usuário:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+    console.log('Cargo do usuário atualizado com sucesso');
+    res.status(200).json({ message: 'Cargo do usuário atualizado com sucesso' });
+  });
+});
+
+// Rota para buscar o cargo do usuário
+app.get('/cargo', verifyToken, (req, res) => {
+  const userId = req.userId; // ID do usuário extraído do token JWT
+
+  // Consulta SQL para selecionar o cargo do usuário
+  const sql = 'SELECT cargo FROM users WHERE id = ?';
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('Erro ao buscar o cargo do usuário:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+
+    if (result.length === 0) {
+      console.error('Usuário não encontrado');
+      res.status(404).json({ error: 'Usuário não encontrado' });
+      return;
+    }
+
+    const cargo = result[0].cargo;
+    console.log('Cargo do usuário:', cargo);
+    res.status(200).json({ role: cargo }); // Retorna o cargo do usuário
+  });
+});
+
 
 
 // Rota de autenticação

@@ -2,6 +2,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
+import './LoginPage.css'; // Importando o arquivo CSS da LoginPage
+import logo from './logo.png'; // Importando o logo da FCA
 
 const config = {
   auth: {
@@ -66,9 +68,13 @@ function LoginPage() {
     
     
     return (
-        <div>
-            <h1>Aplicação React com autenticação Azure</h1>
-            <button onClick={login}>Login com Azure</button>
+        <div className="login-page">
+            <img src={logo} alt="FCA Logo" className="fca-logo" />
+            {/* <h1>Aplicação React com autenticação Azure</h1> */}
+            <button className="login-button" onClick={login}>
+                {/* <img src={logo} alt="FCA Logo" className="button-logo" /> */}
+                Conectar com Azure
+            </button>
         </div>
     );
 }

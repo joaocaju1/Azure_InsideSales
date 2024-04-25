@@ -1,0 +1,51 @@
+/* NavBar.css */
+
+.navbar {
+    height: 100vh;
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: -150px;
+    background-color: #ffa931;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 30px;
+    text-align: start;
+    text-align: center;
+}
+
+.navbar.show {
+    left: 0;
+}
+
+.toggle-button {
+    
+    width: 70%;
+    background-color: transparent; /* Removendo o fundo */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 30px;
+
+}
+
+.toggle-button:hover {
+   color: black;
+}
+
+.toggle-navbar-button:hover {
+    background-color: #555;
+}
+.toggle-navbar-button {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateX(${isNavbarOpen ? '0' : '-100%'});
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.5s;
+}

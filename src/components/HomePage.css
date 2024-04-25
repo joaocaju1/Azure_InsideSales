@@ -27,3 +27,34 @@
   width: 100%;
   min-height: 100px;
 }
+
+
+
+
+
+
+/* CARDS */
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* Alteração para duas colunas */
+  gap: 20px;
+  padding: 20px;
+  margin-left: 40px;
+}
+
+
+.card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.card p {
+  margin: 10px 0;
+}

@@ -1,0 +1,40 @@
+.admin-panel {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 600px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-panel h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-list,
+.role-selector {
+    margin-bottom: 20px;
+}
+
+.user-list select,
+.role-selector select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.role-selector button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.role-selector button:hover {
+    background-color: #0056b3;
+}
+
