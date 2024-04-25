@@ -31,21 +31,40 @@ function LoginPage() {
     const login = async () => {
         try {
             await msalInstance.initialize();
-
+    
             const loginRequest = {
                 scopes: ['openid', 'profile', 'User.Read'],
                 interactionType: InteractionType.Popup,
             };
-
+    
             const loginResponse = await msalInstance.loginPopup(loginRequest);
             console.log('Usuário logado:', loginResponse.account);
-
-            navigate('/'); // Redireciona para a página HomePage após o login
+    
+            // Enviar o username para o backend
+            const username = loginResponse.account.username;
+            const response = await fetch('http://localhost:3001/saveUsername', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username }), // Verifique se o nome do campo está correto
+            });
+    
+            const responseData = await response.json();
+    
+            if (response.ok) {
+                const { token } = responseData;
+                localStorage.setItem('token', token); // Armazena o token JWT retornado pelo backend
+                navigate('/'); // Redireciona para a página HomePage após o login
+            } else {
+                console.error('Erro ao salvar username:', responseData);
+            }
         } catch (error) {
             console.log('Erro ao fazer login:', error);
         }
     };
-
+    
+    
     return (
         <div>
             <h1>Aplicação React com autenticação Azure</h1>
