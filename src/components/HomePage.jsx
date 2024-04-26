@@ -238,6 +238,10 @@ function HomePage() {
         }
     };
 
+    const handlePainel = () => {
+        window.location.href = '/admin';
+    };
+
     return (
         <div>
             <div className={`navbar ${isNavbarOpen ? 'show' : ''}`} onClick={toggleNavbar}>
@@ -250,10 +254,21 @@ function HomePage() {
                             Adicionar Card
                         </button>
                     )}
+                </div>
+    
+
                     <button className="toggle-button" onClick={handleLogout}>
                         Logout
                     </button>
-                </div>
+
+                {(userRole === 'ADM' || userRole === 'ADM') && (
+                    <button className="toggle-button" onClick={handlePainel}>
+                        Painel ADM
+                    </button>
+                )}
+
+                
+                
             </div>
 
             <div className="cards-container">
