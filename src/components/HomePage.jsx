@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PublicClientApplication } from '@azure/msal-browser';
+import InputMask from 'react-input-mask';
 import './Modal.css';
 import './NavBar.css';
 import './HomePage.css';
@@ -24,10 +25,15 @@ function HomePage() {
     const [formData, setFormData] = useState({
         titulo: '',
         empresa: '',
+        nome1: '',
         contato1: '',
+        email1: '',
+        nome2: '',
         contato2: '',
+        email2: '',
         descricao: ''
     });
+    const [formErrors, setFormErrors] = useState({});
     const [cards, setCards] = useState([]);
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
     const [selectedCardData, setSelectedCardData] = useState(null);
@@ -116,17 +122,51 @@ function HomePage() {
 
     const closeModal = () => {
         setIsModalOpen(false);
+        setFormErrors({});
+    };
+
+    const openCardModal = (cardData) => {
+        setSelectedCardData(cardData);
+        setEditedData(cardData); // Preencher os dados de edição com os dados do card selecionado
+        setIsCardModalOpen(true);
+    };
+
+    const closeCardModal = () => {
+        setIsCardModalOpen(false);
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        if (isCardModalOpen) {
+            setEditedData({
+                ...editedData,
+                [name]: value
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value
+            });
+        }
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.titulo) errors.titulo = true;
+        if (!formData.empresa) errors.empresa = true;
+        if (!formData.nome1) errors.nome1 = true;
+        if (!formData.contato1) errors.contato1 = true;
+        if (!formData.email1) errors.email1 = true;
+        return errors;
     };
 
     const handleEnviar = async () => {
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:3001/adicionarCard', {
@@ -140,44 +180,23 @@ function HomePage() {
             const data = await response.json();
             console.log(data);
 
-            setCards([...cards, formData]);
+            setCards([...cards, { ...formData, id: data.insertId }]); // Adicionar o novo card com o ID retornado
             setFormData({
                 titulo: '',
                 empresa: '',
+                nome1: '',
                 contato1: '',
+                email1: '',
+                nome2: '',
                 contato2: '',
+                email2: '',
                 descricao: ''
             });
 
             setIsModalOpen(false);
-            window.location.reload();
         } catch (error) {
             console.error('Erro ao enviar dados para o backend:', error);
         }
-    };
-
-    const toggleNavbar = () => {
-        setIsNavbarOpen(!isNavbarOpen);
-    };
-
-    const openCardModal = (cardData) => {
-        setSelectedCardData(cardData);
-        setIsCardModalOpen(true);
-    };
-
-    const closeCardModal = () => {
-        setIsCardModalOpen(false);
-    };
-
-    const handleEdit = () => {
-        setIsEditing(true);
-        setEditedData({
-            titulo: selectedCardData.titulo,
-            empresa: selectedCardData.empresa,
-            contato1: selectedCardData.contato1,
-            contato2: selectedCardData.contato2,
-            descricao: selectedCardData.descricao
-        });
     };
 
     const handleSave = async () => {
@@ -194,7 +213,6 @@ function HomePage() {
             const data = await response.json();
             console.log(data);
 
-            setSelectedCardData(editedData);
             const updatedCards = cards.map(card => {
                 if (card.id === selectedCardData.id) {
                     return { ...card, ...editedData };
@@ -206,6 +224,7 @@ function HomePage() {
 
             setIsEditing(false);
             setIsCardModalOpen(false);
+            window.location.reload(); // Adiciona um reload da página
         } catch (error) {
             console.error('Erro ao salvar as alterações do card:', error);
         }
@@ -238,15 +257,166 @@ function HomePage() {
         }
     };
 
+    const toggleNavbar = () => {
+        setIsNavbarOpen(!isNavbarOpen);
+    };
+
     const handlePainel = () => {
         window.location.href = '/admin';
     };
+
+    const renderModal = (isEditing) => (
+        <div className="modal">
+            <div className="modal-content">
+                <span className="close" onClick={isEditing ? closeCardModal : closeModal}>&times;</span>
+                <h2>{isEditing ? 'Editar Card' : 'Adicionar Card'}</h2>
+                <label>
+                    Título do Card
+                    <span className="required">(campo obrigatório)</span>
+                </label>
+                <input
+                    className={`modal-input ${formErrors.titulo ? 'error' : ''}`}
+                    type="text"
+                    placeholder="Título"
+                    name="titulo"
+                    value={isEditing ? editedData.titulo : formData.titulo}
+                    onChange={handleInputChange}
+                />
+
+                <label>
+                    Nome da empresa
+                    <span className="required">(campo obrigatório)</span>
+                </label>
+                <input
+                    className={`modal-input ${formErrors.empresa ? 'error' : ''}`}
+                    type="text"
+                    placeholder="Empresa"
+                    name="empresa"
+                    value={isEditing ? editedData.empresa : formData.empresa}
+                    onChange={handleInputChange}
+                />
+
+                <div className="modal-row">
+                    <div className="modal-input-group">
+                        <label>
+                            Nome 1
+                            <span className="required">(campo obrigatório)</span>
+                        </label>
+                        <input
+                            className={`modal-input ${formErrors.nome1 ? 'error' : ''}`}
+                            type="text"
+                            placeholder="Nome(1)"
+                            name="nome1"
+                            value={isEditing ? editedData.nome1 : formData.nome1}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div className="modal-input-group">
+                        <label>
+                            Contato 1
+                            <span className="required">(campo obrigatório)</span>
+                        </label>
+                        <InputMask
+                            className={`modal-input ${formErrors.contato1 ? 'error' : ''}`}
+                            type="text"
+                            placeholder="Contato(1)"
+                            name="contato1"
+                            mask="+999 (99) 99999-9999"
+                            value={isEditing ? editedData.contato1 : formData.contato1}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div className="modal-input-group">
+                        <label>
+                            Email 1
+                            <span className="required">(campo obrigatório)</span>
+                        </label>
+                        <input
+                            className={`modal-input ${formErrors.email1 ? 'error' : ''}`}
+                            type="email"
+                            placeholder="Email(1)"
+                            name="email1"
+                            value={isEditing ? editedData.email1 : formData.email1}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                </div>
+                <div className="modal-row">
+                    <div className="modal-input-group">
+                        <label>
+                            Nome 2
+                            <span className="norequired">(não obrigatório)</span>
+                        </label>
+                        <input
+                            className="modal-input"
+                            type="text"
+                            placeholder="Nome(2)"
+                            name="nome2"
+                            value={isEditing ? editedData.nome2 : formData.nome2}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div className="modal-input-group">
+                        <label>
+                            Contato 2
+                            <span className="norequired">(não obrigatório)</span>
+                        </label>
+                        <InputMask
+                            className="modal-input"
+                            type="text"
+                            placeholder="Contato(2)"
+                            name="contato2"
+                            mask="+999 (99) 99999-9999"
+                            value={isEditing ? editedData.contato2 : formData.contato2}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div className="modal-input-group">
+                        <label>
+                            Email 2
+                            <span className="norequired">(não obrigatório)</span>
+                        </label>
+                        <input
+                            className="modal-input"
+                            type="email"
+                            placeholder="Email(2)"
+                            name="email2"
+                            value={isEditing ? editedData.email2 : formData.email2}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                </div>
+                <textarea
+                    className="modal-textarea"
+                    placeholder="Descrição"
+                    name="descricao"
+                    value={isEditing ? editedData.descricao : formData.descricao}
+                    onChange={handleInputChange}
+                ></textarea>
+                {(userRole === 'ADM' || userRole === 'INSIDE_SALES') && (
+                    <>
+                        {isEditing ? (
+                            <>
+                                <button className="modal-button" onClick={handleSave}>Salvar</button>
+                                <button className="modal-button" onClick={handleDelete}>Excluir</button>
+                                <button className="modal-button" onClick={closeCardModal}>Fechar</button>
+                            </>
+                        ) : (
+                            <>
+                                <button className="modal-button" onClick={handleEnviar}>Enviar</button>
+                                <button className="modal-button" onClick={closeModal}>Fechar</button>
+                            </>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
 
     return (
         <div>
             <div className={`navbar ${isNavbarOpen ? 'show' : ''}`} onClick={toggleNavbar}>
                 <img src={logo} alt="Logo" style={{ width: '40%', margin: '0px auto', display: 'block' }} /> {/* Adicionando o logo */}
-
 
                 <div className="navbar-links">
                     {(userRole === 'ADM' || userRole === 'INSIDE_SALES') && (
@@ -255,99 +425,126 @@ function HomePage() {
                         </button>
                     )}
                 </div>
-    
 
-                    <button className="toggle-button" onClick={handleLogout}>
-                        Logout
-                    </button>
+                <button className="toggle-button" onClick={handleLogout}>
+                    Logout
+                </button>
 
                 {(userRole === 'ADM' || userRole === 'ADM') && (
                     <button className="toggle-button" onClick={handlePainel}>
                         Painel ADM
                     </button>
                 )}
-
-                
-                
             </div>
 
-            <div className="cards-container">
-                {cards.map((card, index) => (
-                    <div key={index} className="card" onClick={() => openCardModal(card)}>
-                        <h2>{card.titulo}</h2>
-                        <p>Empresa: {card.empresa}</p>
-                        <p>Contato 1: {card.contato1}</p>
-                        <p>Contato 2: {card.contato2}</p>
-                        <p>Descrição: {card.descricao}</p>
-                    </div>
-                ))}
-            </div>
-
-            {isModalOpen && (
-    <div className="modal">
-        <div className="modal-content">
-            <span className="close" onClick={closeModal}>&times;</span>
-            <h2>Adicionar Card</h2>
-            <input className="modal-input" type="text" placeholder="Título" name="titulo" value={formData.titulo} onChange={handleInputChange} />
-            <input className="modal-input" type="text" placeholder="Empresa" name="empresa" value={formData.empresa} onChange={handleInputChange} />
-            <input className="modal-input" type="text" placeholder="Contato 1" name="contato1" value={formData.contato1} onChange={handleInputChange} />
-            <input className="modal-input" type="text" placeholder="Contato 2" name="contato2" value={formData.contato2} onChange={handleInputChange} />
-            <textarea className="modal-textarea" placeholder="Descrição" name="descricao" value={formData.descricao} onChange={handleInputChange}></textarea>
-            {(userRole === 'ADM' || userRole === 'INSIDE_SALES') && (
-                <>
-                    {isEditing ? (
-                        <>
-                            <button className="modal-button" onClick={handleEnviar}>Enviar</button>
-                            <button className="modal-button" onClick={closeModal}>Fechar</button>
-                        </>
-                    ) : (
-                        <button className="modal-button" onClick={handleEnviar}>Enviar</button>
-                    )}
-                </>
-            )}
+{/* <div className="cards-container">
+  {cards.map((card, index) => (
+    <div key={index} className="card" onClick={() => openCardModal(card)}>
+      <div className="card-header">
+        <h2>{card.titulo}</h2>
+        <div className="card-company">Empresa: {card.empresa}</div>
+      </div>
+      <div className="card-content">
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Nome 1:</span>
+            <span className="modal-item-value">{card.nome1}</span>
+          </div>
+          <div className="modal-item">
+            <span className="modal-item-label">Contato 1:</span>
+            <span className="modal-item-value">{card.contato1}</span>
+          </div>
         </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Email 1:</span>
+            <span className="modal-item-value">{card.email1}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Nome 2:</span>
+            <span className="modal-item-value">{card.nome2}</span>
+          </div>
+          <div className="modal-item">
+            <span className="modal-item-label">Contato 2:</span>
+            <span className="modal-item-value">{card.contato2}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Email 2:</span>
+            <span className="modal-item-value">{card.email2}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Descrição:</span>
+            <span className="modal-item-value">{card.descricao}</span>
+          </div>
+        </div>
+      </div>
     </div>
-)}
+  ))}
+</div> */}
 
-            {isCardModalOpen && selectedCardData && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <span className="close" onClick={closeCardModal}>&times;</span>
-                        <h2>{selectedCardData.titulo}</h2>
-                        <p>Empresa: {selectedCardData.empresa}</p>
-                        <p>Contato 1: {selectedCardData.contato1}</p>
-                        <p>Contato 2: {selectedCardData.contato2}</p>
-                        <p>Descrição: {selectedCardData.descricao}</p>
-                        {isEditing ? (
-                            <>
-                                <input className="modal-input" type="text" placeholder="Título" name="titulo" value={editedData.titulo} onChange={(e) => setEditedData({ ...editedData, titulo: e.target.value })} />
-                                <input className="modal-input" type="text" placeholder="Empresa" name="empresa" value={editedData.empresa} onChange={(e) => setEditedData({ ...editedData, empresa: e.target.value })} />
-                                <input className="modal-input" type="text" placeholder="Contato 1" name="contato1" value={editedData.contato1} onChange={(e) => setEditedData({ ...editedData, contato1: e.target.value })} />
-                                <input className="modal-input" type="text" placeholder="Contato 2" name="contato2" value={editedData.contato2} onChange={(e) => setEditedData({ ...editedData, contato2: e.target.value })} />
-                                <textarea className="modal-textarea" placeholder="Descrição" name="descricao" value={editedData.descricao} onChange={(e) => setEditedData({ ...editedData, descricao: e.target.value })}></textarea>
 
-                                {(userRole === 'ADM' || userRole === 'INSIDE_SALES') && isEditing && (
-                                    <>
-                                        <button className="modal-button" onClick={handleSave}>Salvar</button>
-                                    </>
-                                )}
+<div className="cards-container">
+  {cards.map((card, index) => (
+    <div key={index} className="card" onClick={() => openCardModal(card)}>
+      <div className="card-header">
+        <h2>{card.titulo}</h2>
+        <div className="card-company">Empresa: {card.empresa}</div>
+      </div>
+      <div className="card-content">
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Nome 1:</span>
+            <span className="modal-item-value">{card.nome1}</span>
+          </div>
+          <div className="modal-item">
+            <span className="modal-item-label">Contato 1:</span>
+            <span className="modal-item-value">{card.contato1}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Email 1:</span>
+            <span className="modal-item-value">{card.email1}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Nome 2:</span>
+            <span className="modal-item-value">{card.nome2}</span>
+          </div>
+          <div className="modal-item">
+            <span className="modal-item-label">Contato 2:</span>
+            <span className="modal-item-value">{card.contato2}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Email 2:</span>
+            <span className="modal-item-value">{card.email2}</span>
+          </div>
+        </div>
+        <div className="modal-row">
+          <div className="modal-item">
+            <span className="modal-item-label">Descrição:</span>
+            <span className="modal-item-value">{card.descricao}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
 
-                                {(userRole === 'ADM' || userRole === 'ADM') && isEditing && (
-                                    <>
-                                        <button className="modal-button" onClick={handleDelete}>Excluir</button>
-                                    </>
-                                )}
-                            </>
-                        ) : (
-                            (userRole !== 'VENDEDOR' && (
-                                <button className="modal-button" onClick={handleEdit}>
-                                    Editar
-                                </button>
-                            ))
-                        )}
-                    </div>
-                </div>
-            )}
+
+
+            {isModalOpen && renderModal(false)}
+
+            {isCardModalOpen && renderModal(true)}
         </div>
     );
 }

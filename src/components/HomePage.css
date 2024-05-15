@@ -1,13 +1,20 @@
+body{
+  background: rgb(255,255,255);
+background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(203,203,203,1) 100%);
+}
+
 .container {
   background-color: rgb(8, 82, 192);
   height: 100vh;
   padding: 20px;
+  
 }
 
 .form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  
 }
 
 .input-group {
@@ -34,27 +41,79 @@
 
 
 /* CARDS */
-
 .cards-container {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* Alteração para duas colunas */
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
+  justify-content: center;
   padding: 20px;
-  margin-left: 40px;
+  margin-left: 50px;
 }
 
-
 .card {
-  background-color: white;
-  padding: 20px;
-  border-radius: 5px;
+  background-color: #fff;
+  border: 1px solid #ece5e5;
+  border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  transition: transform 0.2s;
+  box-sizing: border-box;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card h2 {
-  margin-top: 0;
+  font-size: 20px;
+  color: #333;
 }
 
-.card p {
-  margin: 10px 0;
+.card-company {
+  font-size: 16px;
+  color: #666;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-item-label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 3px;
+}
+
+.modal-item-value {
+  font-size: 16px;
+  color: #333;
+  padding: 5px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-sizing: border-box;
 }

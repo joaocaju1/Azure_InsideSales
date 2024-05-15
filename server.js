@@ -97,6 +97,35 @@ app.get('/cards', verifyToken, (req, res) => {
 });
 
 
+// Rota para verificar o cargo do usuário e redirecionar
+app.get('/checkUserRole', (req, res) => {
+  const { email } = req.query;
+
+  // Verifica o cargo do usuário com base no email
+  db.query('SELECT cargo FROM users WHERE email = ?', [email], (err, result) => {
+    if (err) {
+      console.error('Erro ao buscar o cargo do usuário:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+
+    if (result.length === 0) {
+      console.error('Usuário não encontrado');
+      res.status(404).json({ error: 'Usuário não encontrado' });
+      return;
+    }
+
+    const cargo = result[0].cargo;
+    console.log('Cargo do usuário:', cargo);
+
+    // Redireciona com base no cargo
+    if (cargo === 'MEMBRO') {
+      res.redirect('/membro'); // Redireciona para a página de membro
+    } else {
+      res.redirect('/'); // Redireciona para a página HomePage
+    }
+  });
+});
 
 
 
@@ -113,7 +142,7 @@ app.post('/saveUsername', (req, res) => {
 
       // Se o usuário não existir, insere-o no banco de dados com cargo padrão 'VENDEDOR'
       if (result.length === 0) {
-          db.query('INSERT INTO users (email, cargo) VALUES (?, ?)', [username, 'VENDEDOR'], (err, result) => {
+          db.query('INSERT INTO users (email, cargo) VALUES (?, ?)', [username, 'MEMBRO'], (err, result) => {
               if (err) {
                   console.log('Erro ao inserir usuário:', err);
                   return res.status(500).send('Erro interno do servidor');
@@ -139,13 +168,14 @@ app.post('/saveUsername', (req, res) => {
 });
 
 // Rota para adicionar um novo card
+// Rota para adicionar um novo card
 app.post('/adicionarCard', verifyToken, (req, res) => {
-  const { titulo, empresa, contato1, contato2, descricao } = req.body;
+  const { titulo, empresa, contato1, contato2, email1, email2, nome1, nome2, descricao } = req.body;
   const userId = req.userId; // ID do usuário extraído do token JWT
 
   // Inserir os dados na tabela 'cards'
-  const sql = 'INSERT INTO cards (titulo, empresa, contato1, contato2, descricao, user_id) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(sql, [titulo, empresa, contato1, contato2, descricao, userId], (err, result) => {
+  const sql = 'INSERT INTO cards (titulo, empresa, contato1, contato2, email1, email2, nome1, nome2, descricao, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  db.query(sql, [titulo, empresa, contato1, contato2, email1, email2, nome1, nome2, descricao, userId], (err, result) => {
       if (err) {
           console.error('Erro ao inserir novo card:', err);
           res.status(500).json({ error: 'Erro interno do servidor' });
@@ -159,7 +189,7 @@ app.post('/adicionarCard', verifyToken, (req, res) => {
 // Rota para atualizar um card existente
 app.put('/editarCard/:cardId', verifyToken, (req, res) => {
   const cardId = req.params.cardId;
-  const { titulo, empresa, contato1, contato2, descricao } = req.body;
+  const { titulo, empresa, contato1, contato2, email1, email2, nome1, nome2, descricao } = req.body;
   const userId = req.userId; // ID do usuário extraído do token JWT
 
   // Verificar se o card pertence ao usuário
@@ -176,8 +206,8 @@ app.put('/editarCard/:cardId', verifyToken, (req, res) => {
     }
 
     // Atualizar os dados do card
-    const sql = 'UPDATE cards SET titulo = ?, empresa = ?, contato1 = ?, contato2 = ?, descricao = ? WHERE id = ?';
-    db.query(sql, [titulo, empresa, contato1, contato2, descricao, cardId], (err, result) => {
+    const sql = 'UPDATE cards SET titulo = ?, empresa = ?, contato1 = ?, contato2 = ?, nome1 = ?, nome2 = ?, email1 = ?, email2 = ?, descricao = ? WHERE id = ?';
+    db.query(sql, [titulo, empresa, contato1, contato2, nome1, nome2, email1, email2, descricao, cardId], (err, result) => {
       if (err) {
         console.error('Erro ao atualizar o card:', err);
         res.status(500).json({ error: 'Erro interno do servidor' });
@@ -277,8 +307,6 @@ app.get('/cargo', verifyToken, (req, res) => {
     res.status(200).json({ role: cargo }); // Retorna o cargo do usuário
   });
 });
-
-
 
 // Rota de autenticação
 app.get('/login', passport.authenticate('azuread-openidconnect'));

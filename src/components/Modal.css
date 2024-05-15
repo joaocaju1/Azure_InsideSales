@@ -1,5 +1,3 @@
-/* Modal.css */
-
 .modal {
     display: block;
     position: fixed;
@@ -9,21 +7,25 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.8); /* Fundo mais escuro */
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
+    background-color: #fff;
+    margin: 5% auto; /* Centralizar verticalmente */
+    padding: 30px; /* Aumentar padding */
     border: 1px solid #888;
-    width: 80%;
+    width: 70%; /* Aumentar largura */
+    border-radius: 20px; /* Bordas mais arredondadas */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada */
+    max-width: 900px; /* Limite de largura para telas maiores */
+    box-sizing: border-box;
 }
 
 .close {
     color: #aaa;
     float: right;
-    font-size: 28px;
+    font-size: 32px; /* Aumentar tamanho */
     font-weight: bold;
 }
 
@@ -34,40 +36,99 @@
     cursor: pointer;
 }
 
+.modal-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Espaço entre os inputs */
+    margin-bottom: 5px; /* Margem inferior */
+}
+
+.modal-input-group {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    margin-bottom: 20px; /* Espaçamento entre grupos de inputs */
+}
+
+.modal-input-group label {
+    margin-bottom: 5px; /* Espaço entre o label e o input */
+}
+
+.modal-input-group .required {
+    font-size: 12px; /* Tamanho da fonte menor */
+    color: blue; /* Cor azul */
+    margin-left: 5px; /* Espaço entre o texto e o label */
+}
+
+.modal-content .required{
+    color: blue; /* Cor azul */
+    font-size: 12px; /* Tamanho da fonte menor */
+    margin-left: 5px; /* Espaço entre o texto e o label */
+
+}
+.modal-input-group .norequired {
+    font-size: 12px; /* Tamanho da fonte menor */
+    color: red; /* Cor vermelha */
+    margin-left: 5px; /* Espaço entre o texto e o label */
+}
+
 .modal-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 15px; /* Aumentar padding */
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 10px; /* Bordas mais arredondadas */
     box-sizing: border-box;
+    transition: border-color 0.3s ease; /* Transição suave */
+    font-size: 16px; /* Aumentar tamanho da fonte */
+    width: 100%;
+    margin: 10px 0; /* Espaçamento superior e inferior */
+}
+
+.modal-input.error {
+    border-color: red; /* Borda vermelha para campos com erro */
+}
+
+.modal-input:focus {
+    border-color: #4CAF50; /* Cor da borda ao focar */
+    outline: none; /* Remover outline padrão */
 }
 
 .modal-textarea {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 15px; /* Aumentar padding */
+    margin-bottom: 20px; /* Margem inferior */
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 10px; /* Bordas mais arredondadas */
     box-sizing: border-box;
     resize: vertical;
+    transition: border-color 0.3s ease; /* Transição suave */
+    font-size: 16px; /* Aumentar tamanho da fonte */
+}
+
+.modal-textarea:focus {
+    border-color: #4CAF50; /* Cor da borda ao focar */
+    outline: none; /* Remover outline padrão */
 }
 
 .modal-button {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 20px;
+    padding: 15px 25px; /* Aumentar padding */
     border: none;
-    border-radius: 4px;
+    border-radius: 10px; /* Bordas mais arredondadas */
     cursor: pointer;
-    margin-right: 10px;
+    margin-right: 15px; /* Aumentar margem direita */
+    font-size: 16px; /* Aumentar tamanho da fonte */
+    transition: background-color 0.3s ease; /* Transição suave */
 }
 
 .modal-button:hover {
     background-color: #45a049;
 }
 
+label {
+    margin-left: 15px;
+}
 
-.button-logo{
+.button-logo {
     width: 50px;
 }

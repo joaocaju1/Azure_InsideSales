@@ -1,0 +1,17 @@
+{
+	"version": "1.0.0",
+	"configurations": [
+		{
+			"id": "ijtfe6zik9blw82o8rzkoaclai2rg",
+			"name": "FLUIG HOMOLOG",
+			"host": "fluighomolog.abainfra.com.br",
+			"ssl": true,
+			"port": 2350,
+			"username": "ADMIN",
+			"password": "eyJpdiI6ImJmZTE3NzkwNWEyNmE2Y2RhODEzZGYzYWFjYWFjNjZjIiwic2FsdCI6ImRhNzA5MzJhOTUyOWJmMTc1N2I4OGJjYmNkZDg4OTljIiwidGV4dCI6IjdlZmQxMTUxNjI0ZjQzNGYyMjI5NDZkZTdjY2Q0NmU5ODljNDNlZjI0OTg0ZTY2ZWQ3ZjVkMzc1NTE2YTdjMjcifQ==",
+			"userCode": "admin",
+			"confirmExporting": false,
+			"companyId": 1
+		}
+	]
+}

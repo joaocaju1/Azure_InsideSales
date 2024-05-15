@@ -2,25 +2,20 @@
 
 .navbar {
     height: 100vh;
-    width: 200px;
+    width: 100px;
     position: fixed;
     top: 0;
-    left: -150px;
-    background-color: #ffa931;
+    left: 0; /* Defina a posição como 0 para sempre mostrar a navbar */
+    background: rgb(158,0,0);
+    background: linear-gradient(0deg, rgba(158,0,0,1) 0%, rgba(255,0,0,1) 100%);
     overflow-x: hidden;
-    transition: 0.5s;
     padding-top: 30px;
     text-align: start;
     text-align: center;
-}
+  }
+  
+  .toggle-button {
 
-.navbar.show {
-    left: 0;
-}
-
-.toggle-button {
-    
-    width: 70%;
     background-color: transparent; /* Removendo o fundo */
     color: white;
     padding: 10px 20px;
@@ -28,24 +23,9 @@
     border-radius: 4px;
     cursor: pointer;
     margin-top: 30px;
-
-}
-
-.toggle-button:hover {
-   color: black;
-}
-
-.toggle-navbar-button:hover {
-    background-color: #555;
-}
-.toggle-navbar-button {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateX(${isNavbarOpen ? '0' : '-100%'});
-    background-color: #333;
-    color: white;
-    padding: 10px;
-    cursor: pointer;
-    transition: 0.5s;
-}
+  }
+  
+  .toggle-button:hover {
+    color: black;
+  }
+  

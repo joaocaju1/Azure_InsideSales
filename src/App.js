@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
 import Admin from './components/Admin';
+import MemberPage from './components/MemberPage'
 
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="*" element={<Navigate to="/" />} /> {/* Rota de redirecionamento para o HomePage */}
         <Route path="/admin" element={<Admin />} />
+        <Route path="/membro" element={<MemberPage />} />
       </Routes>
     </Router>
   );

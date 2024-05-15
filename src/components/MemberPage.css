@@ -1,0 +1,40 @@
+/* styles.css */
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: rgb(255,0,0);
+  background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgb(147, 14, 14) 35%, rgba(255,0,0,1) 100%);
+  text-align: center;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.logo{
+  width: 700px;
+}
+
+.informativo{
+  font-size: 30px;
+}
+
+a{
+  color: rgb(250, 250, 250);
+  font-weight: bold;
+}
+
+.home-button{
+  background-color: aliceblue;
+  border: 0px;
+  border-radius: 6px;
+  width: 200px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.home-button:hover{
+  background-color: rgb(163, 163, 163);
+}
