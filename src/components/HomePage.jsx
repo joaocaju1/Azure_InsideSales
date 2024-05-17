@@ -31,7 +31,8 @@ function HomePage() {
         nome2: '',
         contato2: '',
         email2: '',
-        descricao: ''
+        descricao: '',
+        visibleTo: '' // Adiciona o campo para o usuário selecionado
     });
     const [formErrors, setFormErrors] = useState({});
     const [cards, setCards] = useState([]);
@@ -40,6 +41,9 @@ function HomePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState({});
     const [userRole, setUserRole] = useState('');
+    const [users, setUsers] = useState([]); // Adiciona o estado para a lista de usuários
+    const [statusHistory, setStatusHistory] = useState([]); // Adiciona o estado para o histórico de status
+    const [newStatus, setNewStatus] = useState(''); // Adiciona o estado para o novo status
 
     useEffect(() => {
         async function initializeMsal() {
@@ -100,6 +104,29 @@ function HomePage() {
         }
 
         fetchCards();
+
+        async function fetchUsers() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:3001/users', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    setUsers(data);
+                } else {
+                    console.error('Os dados recebidos não são uma matriz:', data);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar os usuários:', error);
+            }
+        }
+
+        fetchUsers();
     }, []);
 
     const handleLogout = async () => {
@@ -125,14 +152,36 @@ function HomePage() {
         setFormErrors({});
     };
 
-    const openCardModal = (cardData) => {
+    const openCardModal = async (cardData) => {
         setSelectedCardData(cardData);
         setEditedData(cardData); // Preencher os dados de edição com os dados do card selecionado
         setIsCardModalOpen(true);
+
+        // Busca o histórico de status para o card selecionado
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3001/status/${cardData.id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                setStatusHistory(data);
+            } else {
+                console.error('Os dados recebidos não são uma matriz:', data);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar o histórico de status:', error);
+        }
     };
 
     const closeCardModal = () => {
         setIsCardModalOpen(false);
+        setStatusHistory([]);
+        setNewStatus('');
     };
 
     const handleInputChange = (e) => {
@@ -157,6 +206,7 @@ function HomePage() {
         if (!formData.nome1) errors.nome1 = true;
         if (!formData.contato1) errors.contato1 = true;
         if (!formData.email1) errors.email1 = true;
+        if (!formData.visibleTo) errors.visibleTo = true; // Verifica se o campo visibleTo está preenchido
         return errors;
     };
 
@@ -190,7 +240,8 @@ function HomePage() {
                 nome2: '',
                 contato2: '',
                 email2: '',
-                descricao: ''
+                descricao: '',
+                visibleTo: ''
             });
 
             setIsModalOpen(false);
@@ -254,6 +305,29 @@ function HomePage() {
             setIsCardModalOpen(false);
         } catch (error) {
             console.error('Erro ao excluir o card:', error);
+        }
+    };
+
+    const handleAddStatus = async () => {
+        if (!newStatus.trim()) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3001/adicionarStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ cardId: selectedCardData.id, status: newStatus }),
+            });
+            const data = await response.json();
+            console.log(data);
+
+            setStatusHistory([{ id: Date.now(), status: newStatus, created_at: new Date(), user_email: 'Você' }, ...statusHistory]);
+            setNewStatus('');
+        } catch (error) {
+            console.error('Erro ao adicionar status:', error);
         }
     };
 
@@ -386,6 +460,23 @@ function HomePage() {
                         />
                     </div>
                 </div>
+
+                <label>
+                    Selecionar usuário
+                    <span className="required">(campo obrigatório)</span>
+                </label>
+                <select
+                    className={`modal-input ${formErrors.visibleTo ? 'error' : ''}`}
+                    name="visibleTo"
+                    value={isEditing ? editedData.visibleTo : formData.visibleTo}
+                    onChange={handleInputChange}
+                >
+                    <option value="">Selecione um usuário</option>
+                    {users.map((user) => (
+                        <option key={user.id} value={user.id}>{user.email}</option>
+                    ))}
+                </select>
+
                 <textarea
                     className="modal-textarea"
                     placeholder="Descrição"
@@ -393,6 +484,30 @@ function HomePage() {
                     value={isEditing ? editedData.descricao : formData.descricao}
                     onChange={handleInputChange}
                 ></textarea>
+
+                {/* Seção para exibir e adicionar status */}
+                {isEditing && (
+                    <>
+                        <h3>Histórico de Status</h3>
+                        <div className="status-history">
+                            {statusHistory.map((status, index) => (
+                                <div key={index} className="status-entry">
+                                    <span className="status-user">{status.user_email}</span>: {status.status}
+                                    <div className="status-timestamp">{new Date(status.created_at).toLocaleString()}</div>
+                                </div>
+                            ))}
+                        </div>
+                        <textarea
+                            className="modal-textarea"
+                            placeholder="Adicionar status"
+                            name="newStatus"
+                            value={newStatus}
+                            onChange={(e) => setNewStatus(e.target.value)}
+                        ></textarea>
+                        <button className="modal-button" onClick={handleAddStatus}>Adicionar Status</button>
+                    </>
+                )}
+
                 {(userRole === 'ADM' || userRole === 'INSIDE_SALES') && (
                     <>
                         {isEditing ? (
@@ -437,110 +552,56 @@ function HomePage() {
                 )}
             </div>
 
-{/* <div className="cards-container">
-  {cards.map((card, index) => (
-    <div key={index} className="card" onClick={() => openCardModal(card)}>
-      <div className="card-header">
-        <h2>{card.titulo}</h2>
-        <div className="card-company">Empresa: {card.empresa}</div>
-      </div>
-      <div className="card-content">
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Nome 1:</span>
-            <span className="modal-item-value">{card.nome1}</span>
-          </div>
-          <div className="modal-item">
-            <span className="modal-item-label">Contato 1:</span>
-            <span className="modal-item-value">{card.contato1}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Email 1:</span>
-            <span className="modal-item-value">{card.email1}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Nome 2:</span>
-            <span className="modal-item-value">{card.nome2}</span>
-          </div>
-          <div className="modal-item">
-            <span className="modal-item-label">Contato 2:</span>
-            <span className="modal-item-value">{card.contato2}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Email 2:</span>
-            <span className="modal-item-value">{card.email2}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Descrição:</span>
-            <span className="modal-item-value">{card.descricao}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  ))}
-</div> */}
-
-
-<div className="cards-container">
-  {cards.map((card, index) => (
-    <div key={index} className="card" onClick={() => openCardModal(card)}>
-      <div className="card-header">
-        <h2>{card.titulo}</h2>
-        <div className="card-company">Empresa: {card.empresa}</div>
-      </div>
-      <div className="card-content">
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Nome 1:</span>
-            <span className="modal-item-value">{card.nome1}</span>
-          </div>
-          <div className="modal-item">
-            <span className="modal-item-label">Contato 1:</span>
-            <span className="modal-item-value">{card.contato1}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Email 1:</span>
-            <span className="modal-item-value">{card.email1}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Nome 2:</span>
-            <span className="modal-item-value">{card.nome2}</span>
-          </div>
-          <div className="modal-item">
-            <span className="modal-item-label">Contato 2:</span>
-            <span className="modal-item-value">{card.contato2}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Email 2:</span>
-            <span className="modal-item-value">{card.email2}</span>
-          </div>
-        </div>
-        <div className="modal-row">
-          <div className="modal-item">
-            <span className="modal-item-label">Descrição:</span>
-            <span className="modal-item-value">{card.descricao}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
-
-
+            <div className="cards-container">
+                {cards.map((card, index) => (
+                    <div key={index} className="card" onClick={() => openCardModal(card)}>
+                        <div className="card-header">
+                            <h2>{card.titulo}</h2>
+                            <div className="card-company">Empresa: {card.empresa}</div>
+                        </div>
+                        <div className="card-content">
+                            <div className="modal-row">
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Nome 1:</span>
+                                    <span className="modal-item-value">{card.nome1}</span>
+                                </div>
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Contato 1:</span>
+                                    <span className="modal-item-value">{card.contato1}</span>
+                                </div>
+                            </div>
+                            <div className="modal-row">
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Email 1:</span>
+                                    <span className="modal-item-value">{card.email1}</span>
+                                </div>
+                            </div>
+                            <div className="modal-row">
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Nome 2:</span>
+                                    <span className="modal-item-value">{card.nome2}</span>
+                                </div>
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Contato 2:</span>
+                                    <span className="modal-item-value">{card.contato2}</span>
+                                </div>
+                            </div>
+                            <div className="modal-row">
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Email 2:</span>
+                                    <span className="modal-item-value">{card.email2}</span>
+                                </div>
+                            </div>
+                            <div className="modal-row">
+                                <div className="modal-item">
+                                    <span className="modal-item-label">Descrição:</span>
+                                    <span className="modal-item-value">{card.descricao}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
             {isModalOpen && renderModal(false)}
 
