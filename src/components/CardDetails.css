@@ -1,0 +1,296 @@
+/* Estilo geral do card details */
+.card-details {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh; /* Ocupa toda a altura da janela do navegador */
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden; /* Evita rolagem vertical */
+}
+
+.card-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.card-details-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.save-button {
+    width: 200px;
+    height: 40px;
+}
+
+.card-details .back-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #555;
+    color: white;
+    font-size: 16px;
+}
+
+.card-details-main {
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+    overflow: hidden; /* Evita rolagem interna */
+}
+
+.card-details-info {
+    flex: 1;
+    padding: 10px;
+    border-right: 1px solid #ddd;
+    max-width: 30%; /* Ajuste a largura para ocupar uma parte menor da tela */
+    overflow-y: auto; /* Adiciona rolagem vertical apenas nesta seção */
+}
+
+.card-info-section {
+    margin-bottom: 20px;
+}
+
+.card-info-section h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #333;
+}
+
+.card-info-section p, .card-info-section label {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #555;
+}
+
+.card-info-section p strong, .card-info-section label strong {
+    color: #333;
+}
+
+/* Estilo do histórico de status */
+.card-details-status {
+    flex: 2; /* Aumente a flex-grow para ocupar mais espaço */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Adiciona rolagem vertical apenas nesta seção */
+}
+
+.card-details-status h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #333;
+}
+
+.status-history {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.status-entry {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.status-user {
+    font-weight: bold;
+}
+
+.status-timestamp {
+    font-size: 0.9em;
+    color: #999;
+}
+
+.card-details .status-input {
+    width: 97%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+}
+
+.card-details .status-button,
+.card-details .delete-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #555;
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.card-details .delete-button {
+    background-color: #d9534f; /* Red for delete button */
+}
+
+.card-details .edit-button, .card-details .save-button {
+    padding: 8px 16px; /* Tamanho reduzido */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 14px; /* Tamanho da fonte reduzido */
+    margin-top: 10px;
+}
+
+.card-details .modal-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.card-details .modal-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo melhorado dos inputs */
+.card-details .modal-input,
+.card-details .modal-textarea {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 5px;
+    transition: border-color 0.3s ease;
+}
+
+.card-details .modal-input:focus,
+.card-details .modal-textarea:focus {
+    border-color: #2196F3;
+    outline: none;
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
+
+.card-details .modal-input.error {
+    border-color: red;
+}
+
+/* Estilo melhorado do textarea */
+.card-details .modal-textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-size: 16px;
+}
+
+.card-details .save-button {
+    background-color: #33f321;
+    font-size: 14px; /* Tamanho da fonte ajustado */
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.card-details .save-button:hover {
+    background-color: #2fd219;
+}
+
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    height: 90%;
+    max-width: 1000px;
+    max-height: 800px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.search-inputHistoric {
+    margin-left: 10px;
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.status-entry {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.status-user {
+    font-weight: bold;
+}
+
+.status-timestamp {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.full-history-button{
+    background-color: #00561e;
+    color: white;
+    border:  none;
+    border-radius: 5px;
+    margin-top: 10px;
+    height: 30px;
+    cursor: pointer;
+    font-style: bold;
+    width: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+

@@ -13,19 +13,21 @@
 .modal-content {
     background-color: #fff;
     margin: 5% auto; /* Centralizar verticalmente */
-    padding: 30px; /* Aumentar padding */
+    padding: 15px; /* Reduzir padding */
     border: 1px solid #888;
-    width: 70%; /* Aumentar largura */
-    border-radius: 20px; /* Bordas mais arredondadas */
+    width: 90%; /* Aumentar largura */
+    max-width: 1300px; /* Limite de largura para telas maiores */
+    max-height: 75%; /* Limitar a altura máxima */
+    border-radius: 15px; /* Bordas mais arredondadas */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Sombra mais pronunciada */
-    max-width: 900px; /* Limite de largura para telas maiores */
     box-sizing: border-box;
+    overflow-y: auto; /* Adicionar rolagem vertical se necessário */
 }
 
 .close {
     color: #aaa;
     float: right;
-    font-size: 32px; /* Aumentar tamanho */
+    font-size: 24px; /* Reduzir tamanho */
     font-weight: bold;
 }
 
@@ -39,15 +41,26 @@
 .modal-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px; /* Espaço entre os inputs */
-    margin-bottom: 5px; /* Margem inferior */
+    gap: 15px; /* Espaço entre os inputs */
+    margin-bottom: 10px; /* Reduzir margem inferior */
 }
 
 .modal-input-group {
-    display: flex;
     flex: 1;
+    display: flex;
     flex-direction: column;
-    margin-bottom: 20px; /* Espaçamento entre grupos de inputs */
+}
+
+.modal-input-group-half {
+    flex: 0 0 48%; /* Cada grupo ocupa cerca de metade da linha */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-input-group-third {
+    flex: 0 0 30%; /* Cada grupo ocupa cerca de um terço da linha */
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-input-group label {
@@ -60,12 +73,12 @@
     margin-left: 5px; /* Espaço entre o texto e o label */
 }
 
-.modal-content .required{
+.modal-content .required {
     color: blue; /* Cor azul */
     font-size: 12px; /* Tamanho da fonte menor */
     margin-left: 5px; /* Espaço entre o texto e o label */
-
 }
+
 .modal-input-group .norequired {
     font-size: 12px; /* Tamanho da fonte menor */
     color: red; /* Cor vermelha */
@@ -73,14 +86,14 @@
 }
 
 .modal-input {
-    padding: 15px; /* Aumentar padding */
+    padding: 8px; /* Reduzir padding */
     border: 1px solid #ccc;
-    border-radius: 10px; /* Bordas mais arredondadas */
+    border-radius: 8px; /* Bordas mais arredondadas */
     box-sizing: border-box;
     transition: border-color 0.3s ease; /* Transição suave */
-    font-size: 16px; /* Aumentar tamanho da fonte */
+    font-size: 14px; /* Reduzir tamanho da fonte */
     width: 100%;
-    margin: 10px 0; /* Espaçamento superior e inferior */
+    margin: 6px 0; /* Reduzir espaçamento superior e inferior */
 }
 
 .modal-input.error {
@@ -94,14 +107,14 @@
 
 .modal-textarea {
     width: 100%;
-    padding: 15px; /* Aumentar padding */
-    margin-bottom: 20px; /* Margem inferior */
+    padding: 8px; /* Reduzir padding */
+    margin-bottom: 10px; /* Reduzir margem inferior */
     border: 1px solid #ccc;
-    border-radius: 10px; /* Bordas mais arredondadas */
+    border-radius: 8px; /* Bordas mais arredondadas */
     box-sizing: border-box;
     resize: vertical;
     transition: border-color 0.3s ease; /* Transição suave */
-    font-size: 16px; /* Aumentar tamanho da fonte */
+    font-size: 14px; /* Reduzir tamanho da fonte */
 }
 
 .modal-textarea:focus {
@@ -112,12 +125,12 @@
 .modal-button {
     background-color: #4CAF50;
     color: white;
-    padding: 15px 25px; /* Aumentar padding */
+    padding: 10px 16px; /* Reduzir padding */
     border: none;
-    border-radius: 10px; /* Bordas mais arredondadas */
+    border-radius: 8px; /* Bordas mais arredondadas */
     cursor: pointer;
-    margin-right: 15px; /* Aumentar margem direita */
-    font-size: 16px; /* Aumentar tamanho da fonte */
+    margin-right: 8px; /* Reduzir margem direita */
+    font-size: 14px; /* Reduzir tamanho da fonte */
     transition: background-color 0.3s ease; /* Transição suave */
 }
 
@@ -130,5 +143,5 @@ label {
 }
 
 .button-logo {
-    width: 50px;
+    width: 40px; /* Reduzir largura do logo */
 }

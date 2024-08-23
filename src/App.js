@@ -4,6 +4,7 @@ import LoginPage from './components/LoginPage';
 import HomePage from './components/HomePage';
 import Admin from './components/Admin';
 import MemberPage from './components/MemberPage'
+import CardDetails from './components/CardDetails';
 
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} /> {/* Rota de redirecionamento para o HomePage */}
         <Route path="/admin" element={<Admin />} />
         <Route path="/membro" element={<MemberPage />} />
+        <Route path="/card/:cardId" element={<CardDetails />} />
+
       </Routes>
     </Router>
   );
