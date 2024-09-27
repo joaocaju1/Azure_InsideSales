@@ -137,13 +137,15 @@ function HomePage() {
                 console.log('MSAL ainda não inicializado. Aguarde...');
                 return;
             }
-
+    
             await msalInstance.logoutPopup();
+            localStorage.removeItem('token'); // Remover o token ao fazer logout
             navigate('/login');
         } catch (error) {
             console.log('Erro ao fazer logout:', error);
         }
     };
+    
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -465,7 +467,7 @@ function HomePage() {
         <div className="homepage">
             <div className="navbar">
                 <div className="logofca">
-                    <img src={logo} alt="FCA Logo" className="fca-logofca"/>
+                    {/* <img src={logo} alt="FCA Logo" className="fca-logofca"/> */}
                     
                 </div>
 
@@ -478,12 +480,16 @@ function HomePage() {
                 />
 
                 <div className="navbar-buttons">
-                    <button className="navbar-button" onClick={openModal}>Adicionar Card</button>
+                    {/* Exibe o botão "Adicionar Card" somente para usuários com cargos "INSIDE_SALES" ou "ADM" */}
+                    {(userRole === 'INSIDE_SALES' || userRole === 'ADM') && (
+                        <button className="navbar-button" onClick={openModal}>Adicionar Card</button>
+                    )}
                     <button className="navbar-button" onClick={handleLogout}>Logout</button>
                     {userRole === 'ADM' && (
                         <button className="navbar-button" onClick={handlePainel}>Painel ADM</button>
                     )}
                 </div>
+
             </div>
 
             <div className="cards-table">

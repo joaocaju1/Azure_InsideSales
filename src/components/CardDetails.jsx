@@ -24,15 +24,32 @@ function CardDetails() {
     const [showFullHistory, setShowFullHistory] = useState(false);
     const [fullStatusHistory, setFullStatusHistory] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [userRole, setUserRole] = useState(''); // Para armazenar o papel do usuário
 
     useEffect(() => {
+        async function fetchUserRole() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:3001/cargo', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
+                setUserRole(data.role); // Definindo o papel do usuário
+            } catch (error) {
+                console.error('Erro ao buscar o cargo do usuário:', error);
+            }
+        }
+
         async function fetchCardData() {
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`http://localhost:3001/cards/${cardId}`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
                 const data = await response.json();
@@ -47,7 +64,7 @@ function CardDetails() {
                         nome2: data.nome2,
                         contato2: data.contato2,
                         email2: data.email2,
-                        descricao: data.descricao
+                        descricao: data.descricao,
                     });
                 }
             } catch (error) {
@@ -61,11 +78,10 @@ function CardDetails() {
                 const response = await fetch(`http://localhost:3001/status/${cardId}`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
                 const data = await response.json();
-
                 if (Array.isArray(data)) {
                     setStatusHistory(data.slice(0, 20));
                 } else {
@@ -76,6 +92,7 @@ function CardDetails() {
             }
         }
 
+        fetchUserRole();
         fetchCardData();
         fetchStatusHistory();
     }, [cardId]);
@@ -89,16 +106,19 @@ function CardDetails() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({ cardId: parseInt(cardId), status: newStatus }),
             });
             const data = await response.json();
             console.log(data);
 
-            setStatusHistory(prevStatusHistory => {
-                const updatedStatusHistory = [{ id: Date.now(), status: newStatus, created_at: new Date(), user_email: 'Você' }, ...prevStatusHistory];
-                return updatedStatusHistory.slice(0, 20); // Limita o tamanho do histórico a 20 mensagens
+            setStatusHistory((prevStatusHistory) => {
+                const updatedStatusHistory = [
+                    { id: Date.now(), status: newStatus, created_at: new Date(), user_email: 'Você' },
+                    ...prevStatusHistory,
+                ];
+                return updatedStatusHistory.slice(0, 20);
             });
             setNewStatus('');
         } catch (error) {
@@ -113,8 +133,8 @@ function CardDetails() {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
+                    'Authorization': `Bearer ${token}`,
+                },
             });
             const data = await response.json();
             console.log(data);
@@ -125,6 +145,19 @@ function CardDetails() {
     };
 
     const handleEditToggle = () => {
+        if (!isEditing) {
+            setEditFormData({
+                titulo: card.titulo,
+                empresa: card.empresa,
+                nome1: card.nome1,
+                contato1: card.contato1,
+                email1: card.email1,
+                nome2: card.nome2,
+                contato2: card.contato2,
+                email2: card.email2,
+                descricao: card.descricao,
+            });
+        }
         setIsEditing(!isEditing);
     };
 
@@ -142,15 +175,19 @@ function CardDetails() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(editFormData),
             });
+
+            if (!response.ok) {
+                throw new Error('Erro na atualização do card');
+            }
+
             const data = await response.json();
             console.log('Resposta do servidor:', data);
 
             if (data.message === 'Card atualizado com sucesso') {
-                // Atualizar os dados do card com os dados editados
                 setCard({ ...card, ...editFormData });
                 setIsEditing(false);
             } else {
@@ -167,7 +204,7 @@ function CardDetails() {
             const response = await fetch(`http://localhost:3001/status/${cardId}/full`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
                 },
             });
             const data = await response.json();
@@ -191,7 +228,7 @@ function CardDetails() {
         setSearchQuery(e.target.value);
     };
 
-    const filteredFullStatusHistory = fullStatusHistory.filter(status =>
+    const filteredFullStatusHistory = fullStatusHistory.filter((status) =>
         status.status.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -234,31 +271,60 @@ function CardDetails() {
                                 <div className="modal-input-group">
                                     <label>
                                         Email 1:
-                                        <input type="email" name="email1" className="modal-input" value={editFormData.email1} onChange={handleEditInputChange} />
+                                        <input
+                                            type="email"
+                                            name="email1"
+                                            className="modal-input"
+                                            value={editFormData.email1}
+                                            onChange={handleEditInputChange}
+                                        />
                                     </label>
                                 </div>
                                 <div className="modal-input-group">
                                     <label>
                                         Nome 2:
-                                        <input type="text" name="nome2" className="modal-input" value={editFormData.nome2} onChange={handleEditInputChange} />
+                                        <input
+                                            type="text"
+                                            name="nome2"
+                                            className="modal-input"
+                                            value={editFormData.nome2}
+                                            onChange={handleEditInputChange}
+                                        />
                                     </label>
                                 </div>
                                 <div className="modal-input-group">
                                     <label>
                                         Contato 2:
-                                        <input type="text" name="contato2" className="modal-input" value={editFormData.contato2} onChange={handleEditInputChange} />
+                                        <input
+                                            type="text"
+                                            name="contato2"
+                                            className="modal-input"
+                                            value={editFormData.contato2}
+                                            onChange={handleEditInputChange}
+                                        />
                                     </label>
                                 </div>
                                 <div className="modal-input-group">
                                     <label>
                                         Email 2:
-                                        <input type="email" name="email2" className="modal-input" value={editFormData.email2} onChange={handleEditInputChange} />
+                                        <input
+                                            type="email"
+                                            name="email2"
+                                            className="modal-input"
+                                            value={editFormData.email2}
+                                            onChange={handleEditInputChange}
+                                        />
                                     </label>
                                 </div>
                                 <div className="modal-input-group">
                                     <label>
                                         Descrição:
-                                        <textarea name="descricao" className="modal-textarea" value={editFormData.descricao} onChange={handleEditInputChange}></textarea>
+                                        <textarea
+                                            name="descricao"
+                                            className="modal-textarea"
+                                            value={editFormData.descricao}
+                                            onChange={handleEditInputChange}
+                                        ></textarea>
                                     </label>
                                     <button className="save-button" onClick={handleSave}>Salvar</button>
                                 </div>
@@ -274,8 +340,27 @@ function CardDetails() {
                                 <p><strong>Contato 2:</strong> {card.contato2}</p>
                                 <p><strong>Email 2:</strong> {card.email2}</p>
                                 <p><strong>Descrição:</strong> {card.descricao}</p>
-                                <button className="edit-button" onClick={handleEditToggle}>Editar</button>
-                                <button className="full-history-button" onClick={handleShowFullHistory}>Ver Histórico Completo</button>
+
+
+                              
+                                {/* Botão de editar, disponível para todos */}
+                                {(userRole === 'INSIDE_SALES' || userRole === 'ADM') && (
+                                <button className="icon-button edit-button" onClick={handleEditToggle}>
+                                    <i className="fas fa-edit"></i> {/* Ícone de edição */}
+                                </button>
+                                )}
+
+                                {/* Botão de histórico de status, disponível para todos */}
+                                <button className="icon-button history-button" onClick={handleShowFullHistory}>
+                                    <i className="fas fa-history"></i> {/* Ícone de histórico */}
+                                </button>
+
+                                {/* Botão de controle de ligações, disponível para todos */}
+                                <button className="icon-button phone-button" onClick={() => navigate('/controleligacoes')}>
+                                    <i className="fas fa-phone-alt"></i> {/* Ícone de controle de ligações */}
+                                </button>
+
+                             
                             </>
                         )}
                     </div>
@@ -298,8 +383,10 @@ function CardDetails() {
                         onChange={(e) => setNewStatus(e.target.value)}
                     ></textarea>
                     <button className="status-button" onClick={handleAddStatus}>Adicionar Status</button>
-                    <button className="delete-button" onClick={handleDelete}>Excluir Card</button>
-                    {/* <button className="full-history-button" onClick={handleShowFullHistory}>Ver Histórico Completo</button> */}
+                       {/* Botão de excluir, disponível apenas para o administrador */}
+                       {userRole === 'ADM' && (
+                                    <button className="delete-button" onClick={handleDelete}>Excluir Card</button>
+                                )}
                 </div>
             </div>
 
@@ -331,3 +418,4 @@ function CardDetails() {
 }
 
 export default CardDetails;
+

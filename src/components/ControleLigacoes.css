@@ -1,0 +1,166 @@
+.controle-ligacoes {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.controle-ligacoes h2 {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    
+}
+
+table {
+    width: 100%;
+    border-collapse: separate; /* Importante para que o border-radius funcione */
+    border-spacing: 0; /* Remove espaçamento extra ao redor da tabela */
+    margin-top: 20px; 
+    border-radius: 10px; /* Aplica o border-radius nas bordas da tabela */
+    overflow: hidden; /* Garante que o conteúdo não saia dos cantos arredondados */
+}
+
+table th,
+table td {
+    padding: 12px;
+    text-align: left;
+    border: 0px solid #a5a5a5;   
+}
+
+/* Arredondar os cantos da primeira linha (topo) */
+table tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+
+table tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Arredondar os cantos da última linha (fundo) */
+table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+table th {
+    background-color: #29292a;
+    color: white;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+
+button {
+    padding: 8px 16px;
+    border: none;
+    background-color: #000000;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.add-ligacao {
+    margin-top: 20px;
+}
+
+.add-ligacao input,
+.add-ligacao textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    
+}
+
+textarea {
+    resize: vertical;
+}
+
+.add-ligacao button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    border-radius: 5px;
+}
+
+.add-ligacao button:hover {
+    background-color: #218838;
+}
+
+.actions-button {
+    background-color: #dc3545;
+}
+
+.actions-button:hover {
+    background-color: #c82333;
+}
+
+.botoes{
+    display: flex;
+}
+
+.toggle-form-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-form-button:hover {
+    background-color: #0056b3;
+}
+
+.add-ligacao {
+    margin-top: 20px;
+}
+
+.add-ligacao input,
+.add-ligacao textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.add-ligacao button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    border-radius: 5px;
+}
+
+.add-ligacao button:hover {
+    background-color: #218838;
+}

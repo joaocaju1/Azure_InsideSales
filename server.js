@@ -11,15 +11,25 @@ const port = 3001;
 
 // Configuração da conexão com o SQL Server
 const dbConfig = {
-  user: 'service.followup', // Substitua pelo seu usuário do SQL Server
-  password: '@2024aba*', // Substitua pela sua senha do SQL Server
-  server: 'SQLSERVER', // Substitua pelo endereço do seu servidor SQL Server++++
+  user: 'service.followup',
+  password: '@2024aba*',
+  server: 'SQLSERVER',
   port: 1443,
   database: 'FOLLOWUP',
   options: {
-    encrypt: true, // Use caso esteja utilizando o Azure SQL. Caso contrário, pode ser false.
-    trustServerCertificate: true // Adicione isso se estiver testando localmente e não tiver um certificado SSL
+    encrypt: true,
+    trustServerCertificate: true
   }
+};
+
+// Função para formatar a data no formato 'YYYY-MM-DD'
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = (`0${date.getMonth() + 1}`).slice(-2);
+  const day = (`0${date.getDate()}`).slice(-2);
+  return `${year}-${month}-${day}`;
 };
 
 // Conectar ao banco de dados SQL Server
@@ -64,18 +74,71 @@ sql.connect(dbConfig).then(pool => {
     const token = req.headers.authorization;
 
     if (!token) {
-      return res.status(401).json({ message: 'Token não fornecido' });
+        return res.status(401).json({ message: 'Token não fornecido' });
     }
 
     jwt.verify(token.split(' ')[1], 'chave_secreta', (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: 'Token inválido' });
-      }
+        if (err) {
+            return res.status(401).json({ message: 'Token inválido' });
+        }
 
-      req.userId = decoded.userId;
-      next();
+        req.userId = decoded.userId;
+        next();
     });
   };
+
+
+
+  // Rota para buscar todos os usuários
+  app.get('/users', async (req, res) => {
+    try {
+      const result = await pool.request().query('SELECT * FROM users');
+      res.status(200).json(result.recordset);
+    } catch (err) {
+      console.error('Erro ao buscar os usuários:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Rota para atualizar o cargo do usuário
+  app.put('/updateUserRole/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const { cargo } = req.body;
+
+    try {
+      await pool.request()
+        .input('userId', sql.Int, userId)
+        .input('cargo', sql.NVarChar, cargo)
+        .query('UPDATE users SET cargo = @cargo WHERE id = @userId');
+      
+      res.status(200).json({ message: 'Cargo do usuário atualizado com sucesso' });
+    } catch (err) {
+      console.error('Erro ao atualizar o cargo do usuário:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Rota para buscar o cargo do usuário
+  app.get('/cargo', verifyToken, async (req, res) => {
+    const userId = req.userId;
+
+    try {
+      const result = await pool.request()
+        .input('userId', sql.Int, userId)
+        .query('SELECT cargo FROM users WHERE id = @userId');
+
+      if (result.recordset.length === 0) {
+        res.status(404).json({ error: 'Usuário não encontrado' });
+        return;
+      }
+
+      const cargo = result.recordset[0].cargo;
+      res.status(200).json({ role: cargo });
+    } catch (err) {
+      console.error('Erro ao buscar o cargo do usuário:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
 
   // Rota para buscar os cards visíveis ao usuário
   app.get('/cards', verifyToken, async (req, res) => {
@@ -92,7 +155,7 @@ sql.connect(dbConfig).then(pool => {
     }
   });
 
-  // Rota para buscar todos os cards (independente do usuário)
+  // Rota para buscar todos os cards
   app.get('/todosCards', verifyToken, async (req, res) => {
     try {
       const result = await pool.request().query('SELECT * FROM cards');
@@ -103,7 +166,7 @@ sql.connect(dbConfig).then(pool => {
     }
   });
 
-  // Rota para verificar o cargo do usuário e redirecionar
+  // Rota para verificar o cargo do usuário
   app.get('/checkUserRole', async (req, res) => {
     const { email } = req.query;
 
@@ -130,7 +193,7 @@ sql.connect(dbConfig).then(pool => {
     }
   });
 
-  // Rota para receber e armazenar o username e gerar token JWT
+  // Rota para salvar o username e gerar token JWT
   app.post('/saveUsername', async (req, res) => {
     const { username } = req.body;
 
@@ -192,94 +255,6 @@ sql.connect(dbConfig).then(pool => {
     }
   });
 
-  app.put('/editarCard/:cardId', verifyToken, async (req, res) => {
-    const cardId = req.params.cardId;
-    const { empresa, nome1, contato1, email1, nome2, contato2, email2, descricao } = req.body;
-    const userId = req.userId;
-
-    try {
-      const result = await pool.request()
-        .input('cardId', sql.Int, cardId)
-        .input('userId', sql.Int, userId)
-        .query('SELECT * FROM cards WHERE id = @cardId AND user_id = @userId');
-
-      if (result.recordset.length === 0) {
-        res.status(404).json({ error: 'Card não encontrado ou não autorizado' });
-        return;
-      }
-
-      await pool.request()
-        .input('empresa', sql.NVarChar, empresa)
-        .input('nome1', sql.NVarChar, nome1)
-        .input('contato1', sql.NVarChar, contato1)
-        .input('email1', sql.NVarChar, email1)
-        .input('nome2', sql.NVarChar, nome2)
-        .input('contato2', sql.NVarChar, contato2)
-        .input('email2', sql.NVarChar, email2)
-        .input('descricao', sql.NVarChar, descricao)
-        .input('cardId', sql.Int, cardId)
-        .query('UPDATE cards SET empresa = @empresa, nome1 = @nome1, contato1 = @contato1, email1 = @email1, nome2 = @nome2, contato2 = @contato2, email2 = @email2, descricao = @descricao WHERE id = @cardId');
-      
-      res.status(200).json({ message: 'Card atualizado com sucesso' });
-    } catch (err) {
-      console.error('Erro ao atualizar o card:', err);
-      res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-  });
-  
-  // Rota para excluir um card específico
-  app.delete('/excluirCard/:cardId', verifyToken, async (req, res) => {
-    const cardId = req.params.cardId;
-    const userId = req.userId;
-
-    try {
-      const result = await pool.request()
-        .input('cardId', sql.Int, cardId)
-        .input('userId', sql.Int, userId)
-        .query('SELECT * FROM cards WHERE id = @cardId AND user_id = @userId');
-
-      if (result.recordset.length === 0) {
-        res.status(404).json({ error: 'Card não encontrado ou não autorizado' });
-        return;
-      }
-
-      // Primeiro exclua os status associados ao card
-      await pool.request()
-        .input('cardId', sql.Int, cardId)
-        .query('DELETE FROM card_statuses WHERE card_id = @cardId');
-
-      // Então, exclua o card
-      await pool.request()
-        .input('cardId', sql.Int, cardId)
-        .query('DELETE FROM cards WHERE id = @cardId');
-
-      res.status(200).json({ message: 'Card excluído com sucesso' });
-    } catch (err) {
-      console.error('Erro ao excluir o card:', err);
-      res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-  });
-
-  app.get('/cards/:cardId', verifyToken, async (req, res) => {
-    const cardId = req.params.cardId;
-
-    try {
-      const result = await pool.request()
-        .input('cardId', sql.Int, cardId)
-        .query('SELECT * FROM cards WHERE id = @cardId');
-
-      if (result.recordset.length === 0) {
-        res.status(404).json({ error: 'Card não encontrado' });
-        return;
-      }
-
-      res.status(200).json(result.recordset[0]);
-    } catch (err) {
-      console.error('Erro ao buscar o card:', err);
-      res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-  });
-
   // Rota para adicionar um status a um card
   app.post('/adicionarStatus', verifyToken, async (req, res) => {
     const { cardId, status } = req.body;
@@ -303,7 +278,8 @@ sql.connect(dbConfig).then(pool => {
     }
   });
 
-  // Rota para buscar os status de um card
+
+// Rota para buscar os status de um card
   app.get('/status/:cardId', verifyToken, async (req, res) => {
     const cardId = req.params.cardId;
 
@@ -319,91 +295,163 @@ sql.connect(dbConfig).then(pool => {
     }
   });
 
-  // Rota para buscar todos os usuários
-  app.get('/users', async (req, res) => {
-    try {
-      const result = await pool.request().query('SELECT * FROM users');
-      res.status(200).json(result.recordset);
-    } catch (err) {
-      console.error('Erro ao buscar os usuários:', err);
-      res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-  });
+  // Rota para buscar o histórico completo de status de um card
+app.get('/status/:cardId/full', verifyToken, async (req, res) => {
+  const cardId = req.params.cardId;
 
-  // Rota para atualizar o cargo do usuário
-  app.put('/updateUserRole/:userId', async (req, res) => {
-    const userId = req.params.userId;
-    const { cargo } = req.body;
+  try {
+    const result = await pool.request()
+      .input('cardId', sql.Int, cardId)
+      .query('SELECT s.*, u.email AS user_email FROM card_statuses s JOIN users u ON s.user_id = u.id WHERE s.card_id = @cardId ORDER BY s.created_at DESC');
 
-    try {
-      await pool.request()
-        .input('userId', sql.Int, userId)
-        .input('cargo', sql.NVarChar, cargo)
-        .query('UPDATE users SET cargo = @cargo WHERE id = @userId');
-      
-      res.status(200).json({ message: 'Cargo do usuário atualizado com sucesso' });
-    } catch (err) {
-      console.error('Erro ao atualizar o cargo do usuário:', err);
-      res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-  });
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error('Erro ao buscar o histórico completo de status:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
 
-  // Rota para buscar o cargo do usuário
-  app.get('/cargo', verifyToken, async (req, res) => {
+  
+
+// Rota para editar um card existente
+app.put('/editarCard/:cardId', verifyToken, async (req, res) => {
+    const cardId = req.params.cardId;
+    const { titulo, empresa, nome1, contato1, email1, nome2, contato2, email2, descricao } = req.body;
     const userId = req.userId;
 
     try {
-      const result = await pool.request()
-        .input('userId', sql.Int, userId)
-        .query('SELECT cargo FROM users WHERE id = @userId');
+        const result = await pool.request()
+            .input('cardId', sql.Int, cardId)
+            .input('userId', sql.Int, userId)
+            .query('SELECT * FROM cards WHERE id = @cardId AND user_id = @userId');
 
-      if (result.recordset.length === 0) {
-        res.status(404).json({ error: 'Usuário não encontrado' });
-        return;
-      }
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ error: 'Card não encontrado ou você não tem permissão para editá-lo' });
+        }
 
-      const cargo = result.recordset[0].cargo;
-      res.status(200).json({ role: cargo });
+        await pool.request()
+            .input('titulo', sql.NVarChar, titulo)
+            .input('empresa', sql.NVarChar, empresa)
+            .input('nome1', sql.NVarChar, nome1)
+            .input('contato1', sql.NVarChar, contato1)
+            .input('email1', sql.NVarChar, email1)
+            .input('nome2', sql.NVarChar, nome2)
+            .input('contato2', sql.NVarChar, contato2)
+            .input('email2', sql.NVarChar, email2)
+            .input('descricao', sql.NVarChar, descricao)
+            .input('cardId', sql.Int, cardId)
+            .query('UPDATE cards SET titulo = @titulo, empresa = @empresa, nome1 = @nome1, contato1 = @contato1, email1 = @email1, nome2 = @nome2, contato2 = @contato2, email2 = @email2, descricao = @descricao WHERE id = @cardId');
+        
+        res.status(200).json({ message: 'Card atualizado com sucesso' });
     } catch (err) {
-      console.error('Erro ao buscar o cargo do usuário:', err);
-      res.status(500).json({ error: 'Erro interno do servidor' });
+        console.error('Erro ao atualizar o card:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
-  });
+});
 
-  // Rota para buscar o histórico completo de status de um card
-  app.get('/status/:cardId/full', verifyToken, async (req, res) => {
-    const cardId = req.params.cardId;
 
+
+  // Rota para buscar todas as ligações
+  app.get('/ligacoes', verifyToken, async (req, res) => {
     try {
-      const result = await pool.request()
-        .input('cardId', sql.Int, cardId)
-        .query('SELECT s.*, u.email AS user_email FROM card_statuses s JOIN users u ON s.user_id = u.id WHERE s.card_id = @cardId ORDER BY s.created_at DESC');
-
+      const result = await pool.request().query('SELECT * FROM ligacoes');
       res.status(200).json(result.recordset);
     } catch (err) {
-      console.error('Erro ao buscar o histórico completo de status:', err);
+      console.error('Erro ao buscar as ligações:', err);
       res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
 
-  // Rota de autenticação
-  app.get('/login', passport.authenticate('azuread-openidconnect'));
+  // Rota para adicionar uma nova ligação
+  app.post('/ligacoes', verifyToken, async (req, res) => {
+    const { cliente, inside, produto, programacaoLigacao, situacaoContato, comentarios, proximoContato, ocorrencia } = req.body;
+    const userId = req.userId; // O ID do usuário vem do middleware verifyToken
 
-  // Rota de retorno após a autenticação
-  app.post('/auth/openid/return', passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }),
-    (req, res) => {
-      res.redirect('/');
-    }
-  );
-
-  // Rota protegida
-  app.get('/', (req, res) => {
-    if (req.isAuthenticated()) {
-      res.send(`Seja bem-vindo, ${req.user.displayName}!`);
-    } else {
-      res.send('Faça login para acessar esta página.');
+    try {
+        await pool.request()
+            .input('cliente', sql.NVarChar, cliente)
+            .input('inside', sql.NVarChar, inside)
+            .input('produto', sql.NVarChar, produto)
+            .input('programacaoLigacao', sql.Date, formatDate(programacaoLigacao)) // Formatando a data
+            .input('situacaoContato', sql.NVarChar, situacaoContato)
+            .input('comentarios', sql.NVarChar, comentarios)
+            .input('proximoContato', sql.Date, formatDate(proximoContato)) // Formatando a data
+            .input('ocorrencia', sql.NVarChar, ocorrencia)
+            .input('userId', sql.Int, userId)
+            .query('INSERT INTO ligacoes (cliente, inside, produto, programacao_ligacao, situacao_contato, comentarios, proximo_contato, ocorrencia, user_id) VALUES (@cliente, @inside, @produto, @programacaoLigacao, @situacaoContato, @comentarios, @proximoContato, @ocorrencia, @userId)');
+        
+        res.status(200).json({ message: 'Ligação adicionada com sucesso' });
+    } catch (err) {
+        console.error('Erro ao adicionar ligação:', err);
+        res.status(500).json({ error: 'Erro ao adicionar ligação' });
     }
   });
+
+  // Rota para editar uma ligação existente
+  app.put('/ligacoes/:ligacaoId', verifyToken, async (req, res) => {
+    const { cliente, inside, produto, programacaoLigacao, situacaoContato, comentarios, proximoContato, ocorrencia } = req.body;
+
+    try {
+        await pool.request()
+            .input('cliente', sql.NVarChar, cliente)
+            .input('inside', sql.NVarChar, inside)
+            .input('produto', sql.NVarChar, produto)
+            .input('programacaoLigacao', sql.Date, formatDate(programacaoLigacao))
+            .input('situacaoContato', sql.NVarChar, situacaoContato)
+            .input('comentarios', sql.NVarChar, comentarios)
+            .input('proximoContato', sql.Date, formatDate(proximoContato))
+            .input('ocorrencia', sql.NVarChar, ocorrencia)
+            .input('ligacaoId', sql.Int, req.params.ligacaoId)
+            .query('UPDATE ligacoes SET cliente = @cliente, inside = @inside, produto = @produto, programacao_ligacao = @programacaoLigacao, situacao_contato = @situacaoContato, comentarios = @comentarios, proximo_contato = @proximoContato, ocorrencia = @ocorrencia WHERE id = @ligacaoId');
+        
+        res.status(200).json({ message: 'Ligação atualizada com sucesso' });
+    } catch (err) {
+        console.error('Erro ao atualizar ligação:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Rota para excluir uma ligação
+  app.delete('/ligacoes/:ligacaoId', verifyToken, async (req, res) => {
+    const ligacaoId = req.params.ligacaoId;
+
+    try {
+        await pool.request()
+            .input('ligacaoId', sql.Int, ligacaoId)
+            .query('DELETE FROM ligacoes WHERE id = @ligacaoId');
+
+        res.status(200).json({ message: 'Ligação excluída com sucesso' });
+    } catch (err) {
+        console.error('Erro ao excluir ligação:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+ // Rota para buscar todas as ligações com todos os campos
+app.get('/todas-ligacoes', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.request()
+      .query(`
+        SELECT 
+          cliente,
+          inside,
+          produto,
+          programacao_ligacao AS programacaoLigacao,
+          situacao_contato AS situacaoContato,
+          comentarios,
+          proximo_contato AS proximoContato,
+          ocorrencia
+        FROM ligacoes
+      `);
+
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error('Erro ao buscar as ligações:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+  
 
   // Iniciar servidor
   app.listen(port, () => {

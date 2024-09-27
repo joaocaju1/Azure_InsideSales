@@ -21,14 +21,15 @@ function LoginPage() {
     useEffect(() => {
         const checkAuthentication = async () => {
             const accounts = msalInstance.getAllAccounts();
-
+    
             if (accounts.length > 0) {
                 navigate('/'); // Redireciona para a página HomePage se o usuário estiver autenticado
             }
         };
-
+    
         checkAuthentication();
     }, [navigate]);
+    
       
     const login = async () => {
         try {
@@ -42,50 +43,28 @@ function LoginPage() {
             const loginResponse = await msalInstance.loginPopup(loginRequest);
             console.log('Usuário logado:', loginResponse.account);
     
-            // Enviar o username para o backend
             const username = loginResponse.account.username;
             const response = await fetch('http://localhost:3001/saveUsername', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username }), // Verifique se o nome do campo está correto
+                body: JSON.stringify({ username }),
             });
     
             const responseData = await response.json();
     
             if (response.ok) {
                 const { token } = responseData;
-                localStorage.setItem('token', token); // Armazena o token JWT retornado pelo backend
-                
-                // Verifica o cargo do usuário após o login
-                const roleResponse = await fetch('http://localhost:3001/cargo', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho de autorização
-                    },
-                });
-    
-                const roleData = await roleResponse.json();
-    
-                // Redireciona com base no cargo do usuário
-                if (roleResponse.ok) {
-                    const { role } = roleData;
-                    if (role === 'MEMBRO') {
-                        navigate('/membro'); // Redireciona para a página de membro
-                    } else {
-                        navigate('/'); // Redireciona para a página HomePage
-                    }
-                } else {
-                    console.error('Erro ao verificar cargo do usuário:', roleData);
-                }
-            } else {
-                console.error('Erro ao salvar username:', responseData);
+                localStorage.setItem('token', token); // Armazena o token JWT no localStorage
+                navigate('/'); // Redireciona para a HomePage após o login
             }
         } catch (error) {
             console.log('Erro ao fazer login:', error);
         }
     };
+    
+    
     
     
     

@@ -278,19 +278,46 @@
     color: #888;
 }
 
-.full-history-button{
-    background-color: #00561e;
-    color: white;
-    border:  none;
-    border-radius: 5px;
-    margin-top: 10px;
+.icon-button {
+    width: 30px;
     height: 30px;
-    cursor: pointer;
-    font-style: bold;
-    width: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-}
-
+    margin-left: 10px;
+  }
+  
+  .icon-button i {
+    font-size: 16px;
+    color: white; /* Cor do ícone */
+    margin-left: -10px;
+  }
+  
+  .icon-button:hover {
+    opacity: 0.9; /* Efeito de hover */
+  }
+  
+  /* Botão de Edição */
+  .edit-button {
+    background-color: #4CAF50; /* Cor padrão para editar */
+  }
+  
+  .edit-button:hover {
+    background-color: #45a049; /* Cor ao passar o mouse no botão de edição */
+  }
+  
+  /* Botão de Histórico */
+  .history-button {
+    background-color: #000000; /* Cor padrão para histórico */
+  }
+  
+  .history-button:hover {
+    background-color: #004c1a; /* Cor ao passar o mouse no botão de histórico */
+  }
+  
+  /* Botão de Controle de Ligações */
+  .phone-button {
+    background-color: #007BFF; /* Cor padrão para controle de ligações */
+  }
+  
+  .phone-button:hover {
+    background-color: #006fdd; /* Cor ao passar o mouse no botão de controle de ligações */
+  }
+  
